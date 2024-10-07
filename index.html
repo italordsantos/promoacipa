@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <script src="html5-qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        #codeList {
+            border-bottom: 1px solid #ddd;
+        }
+
+        #codeList ul {
+            list-style-type: none;
+            padding: 0;
+            max-height: 70vh;
+            height: 70vh;
+            overflow-y: scroll;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #codeList li {
+            padding-top: 8px;
+            padding-left: 8px;
+            border-bottom: 1px solid #ddd;
+            font-size: 11px;
+        }
+
+        #response {
+            margin-left: 20px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="card-body">
+            <h1 class="text-center">Envie automaticamente seus cupons ACIPA!</h1>
+            
+            <div class="mb-4">
+                <label for="nome" class="form-label">Seu nome no cadastro é:</label>
+                <input type="text" id="nome" class="form-control" placeholder="Italo Rodrigues">
+                
+                <label for="cpf" class="form-label mt-3">Seu CPF é:</label>
+                <input type="number" id="cpf" class="form-control" placeholder="123.123.123-12">
+            </div>
+        </div>
+    </div>
+    <div style="display: flex;">
+        <div style="width: 500px" id="reader"></div>
+        <div id="codeList">
+            <h2>QR Codes Lidos</h2>
+            <ul id="codes"></ul>
+        </div>
+        <div id="response">
+            <h2>Respostas da API</h2>
+            <ul id="responses"></ul>
+        </div>
+    </div>
+
+    <script>
+        const codesRead = new Set();
+        const url = 'https://www.promoacipa.com.br/2024/phpScripts/exec.php';
+
+        function onScanSuccess(decodedText, decodedResult) {
+            if (!codesRead.has(decodedText)) {
+                codesRead.add(decodedText);
+                updateCodeList();
+                sendPostRequest(decodedText); // Enviar o código lido para a API
+            }
+        }
+
+        function onScanError(errorMessage) {
+            // Tratar erros de leitura, se necessário
+        }
+
+        function updateCodeList() {
+            const codeList = document.getElementById('codes');
+            codeList.innerHTML = '';
+
+            codesRead.forEach(code => {
+                const listItem = document.createElement('li');
+                listItem.textContent = code;
+                codeList.appendChild(listItem);
+            });
+        }
+
+        function updateResponseList(code, response) {
+            const responseList = document.getElementById('responses');
+            const listItem = document.createElement('li');
+            listItem.textContent = `Código: ${code} - Resposta: ${response}`;
+            responseList.appendChild(listItem);
+        }
+
+        async function sendPostRequest(code) {
+            const formData = new FormData();
+            formData.append('cpf', '52368238972');
+            formData.append('nome', 'JAIR RODRIGUES DOS SANTOS');
+            formData.append('tipocupom', 'rasgadinha');
+            formData.append('todo', 'cadastraRasgadinha');
+            formData.append('barras', code);
+
+            try {
+                const response = await axios.post(url, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'Access-Control-Allow-Origin': '*'
+                    }
+                });
+                updateResponseList(code, response.data); // Atualizar a lista de respostas
+            } catch (error) {
+                console.error('Detalhes do erro:', error);
+                updateResponseList(code, `Erro: ${error.message}`); // Exibir erro na lista de respostas
+            }
+        }
+
+        const html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader",
+            {
+                fps: 10,
+                qrbox: 250,
+                facingMode: { exact: "environment" } // Use "environment" para a câmera traseira
+            },
+            /* verbose= */ false
+        );
+
+        html5QrcodeScanner.render(onScanSuccess, onScanError);
+    </script>
+</body>
+
+</html>
