@@ -1,18 +1,11 @@
 const express = require('express');
 const axios = require('axios');
 const qs = require('qs');
-const path = require('path'); // Importar path para trabalhar com diretórios
 
-const app = express();
-
-// Middleware para interpretar JSON no body das requisições
-app.use(express.json());
-
-// Servir arquivos estáticos da pasta 'public'
-app.use(express.static(path.join(__dirname, 'public')));
+const router = express.Router();
 
 // Rota para receber o valor lido do QR Code
-app.post('/api/enviar', (req, res) => {
+router.post('/enviar', (req, res) => {
   const { barras, cpf } = req.body;
 
   let data = qs.stringify({
@@ -35,20 +28,19 @@ app.post('/api/enviar', (req, res) => {
   };
 
   axios.request(config)
-  .then((response) => {
-    res.json(response.data);
-  })
-  .catch((error) => {
-    console.error(error);
-    res.status(500).send('Erro ao enviar os dados');
-  });
+    .then((response) => {
+      res.json(response.data);
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send('Erro ao enviar os dados');
+    });
 });
 
 // Endpoint para obter os cupons
-app.post('/api/listarCupons', (req, res) => {
-  const cpf = req.body.cpf;  // O CPF virá do frontend
+router.post('/listarCupons', (req, res) => {
+  const cpf = req.body.cpf;
 
-  
   let data = qs.stringify({
     'cpf': cpf,
     'todo': 'listarCupons'
@@ -71,10 +63,8 @@ app.post('/api/listarCupons', (req, res) => {
   axios(config)
     .then((response) => {
       const html = response.data;
-
-      // Extraindo os dados da tabela do HTML
       const cupons = extractCouponsFromHTML(html);
-      res.json(cupons);  // Retornar os cupons para o frontend
+      res.json(cupons);
     })
     .catch((error) => {
       console.error(error);
@@ -100,8 +90,4 @@ function extractCouponsFromHTML(html) {
   return cupons;
 }
 
-// Iniciar o servidor
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
+module.exports = router;
