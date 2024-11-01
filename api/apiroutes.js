@@ -1,84 +1,83 @@
-const express = require('express');
-const axios = require('axios');
-const qs = require('qs');
+const axios = require("axios");
+const qs = require("qs");
 
-const router = express.Router();
+module.exports = async (req, res) => {
+  if (req.method === "GET" && req.url === "/api/enviar") {
+    return res.json({ message: "opa :D" });
+  }
 
-router.get('/enviar', (req, res) => {
-  res.send("opa :D");
-});
+  if (req.method === "POST" && req.url === "/api/enviar") {
+    const { barras, cpf } = req.body;
 
-// Rota para receber o valor lido do QR Code
-router.post('/enviar', (req, res) => {
-  const { barras, cpf } = req.body;
-
-  let data = qs.stringify({
-    'barras': barras,
-    'cpf': cpf,
-    'tipocupom': 'rasgadinha',
-    'todo': 'cadastraRasgadinha'
-  });
-
-  let config = {
-    method: 'post',
-    maxBodyLength: Infinity,
-    url: 'https://promoacipa.com.br/2024/phpScripts/exec.php',
-    headers: { 
-      'sec-ch-ua-platform': '"Windows"',
-      'X-Requested-With': 'XMLHttpRequest',
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-    },
-    data: data
-  };
-
-  axios.request(config)
-    .then((response) => {
-      res.json(response.data);
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).send('Erro ao enviar os dados');
+    const data = qs.stringify({
+      barras: barras,
+      cpf: cpf,
+      tipocupom: "rasgadinha",
+      todo: "cadastraRasgadinha",
     });
-});
 
-// Endpoint para obter os cupons
-router.post('/listarCupons', (req, res) => {
-  const cpf = req.body.cpf;
+    const config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: "https://promoacipa.com.br/2024/phpScripts/exec.php",
+      headers: {
+        "sec-ch-ua-platform": '"Windows"',
+        "X-Requested-With": "XMLHttpRequest",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      },
+      data: data,
+    };
 
-  let data = qs.stringify({
-    'cpf': cpf,
-    'todo': 'listarCupons'
-  });
+    try {
+      const response = await axios.request(config);
+      return res.json(response.data);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send("Erro ao enviar os dados");
+    }
+  }
 
-  let config = {
-    method: 'post',
-    maxBodyLength: Infinity,
-    url: 'https://promoacipa.com.br/2024/phpScripts/exec.php',
-    headers: { 
-      'sec-ch-ua-platform': '"Windows"',
-      'X-Requested-With': 'XMLHttpRequest',
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
-      'Accept': '*/*',
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-    },
-    data: data
-  };
+  if (req.method === "POST" && req.url === "/api/listarCupons") {
+    const { cpf } = req.body;
 
-  axios(config)
-    .then((response) => {
+    const data = qs.stringify({
+      cpf: cpf,
+      todo: "listarCupons",
+    });
+
+    const config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: "https://promoacipa.com.br/2024/phpScripts/exec.php",
+      headers: {
+        "sec-ch-ua-platform": '"Windows"',
+        "X-Requested-With": "XMLHttpRequest",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
+        Accept: "*/*",
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      },
+      data: data,
+    };
+
+    try {
+      const response = await axios(config);
       const html = response.data;
       const cupons = extractCouponsFromHTML(html);
-      res.json(cupons);
-    })
-    .catch((error) => {
+      return res.json(cupons);
+    } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Erro ao buscar os cupons' });
-    });
-});
+      return res.status(500).json({ error: "Erro ao buscar os cupons" });
+    }
+  }
+
+  return res.status(405).send("Método não permitido");
+};
 
 // Função para extrair cupons do HTML
 function extractCouponsFromHTML(html) {
-  const regex = /<tr[^>]*>\s*<td>(\d+)<\/td>\s*<td>(\d+)<\/td>\s*<td>([^<]+)<\/td>\s*<td>([^<]+)<\/td>/g;
+  const regex =
+    /<tr[^>]*>\s*<td>(\d+)<\/td>\s*<td>(\d+)<\/td>\s*<td>([^<]+)<\/td>\s*<td>([^<]+)<\/td>/g;
   let matches;
   const cupons = [];
 
@@ -87,11 +86,9 @@ function extractCouponsFromHTML(html) {
       nrSorte: matches[1],
       serie: matches[2],
       codBarras: matches[3],
-      loja: matches[4]
+      loja: matches[4],
     });
   }
 
   return cupons;
 }
-
-module.exports = router;
