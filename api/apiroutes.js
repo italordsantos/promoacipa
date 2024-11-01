@@ -4,12 +4,12 @@ const qs = require('qs');
 
 const router = express.Router();
 
-router.get('/api/enviar', (req, res) => {
+router.get('/enviar', (req, res) => {
   res.send("opa :D");
 });
 
 // Rota para receber o valor lido do QR Code
-router.post('/api/enviar', (req, res) => {
+router.post('/enviar', (req, res) => {
   const { barras, cpf } = req.body;
 
   let data = qs.stringify({
@@ -42,7 +42,7 @@ router.post('/api/enviar', (req, res) => {
 });
 
 // Endpoint para obter os cupons
-router.post('/api/listarCupons', (req, res) => {
+router.post('/listarCupons', (req, res) => {
   const cpf = req.body.cpf;
 
   let data = qs.stringify({
