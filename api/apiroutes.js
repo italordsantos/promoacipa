@@ -4,6 +4,10 @@ const qs = require('qs');
 
 const router = express.Router();
 
+router.get('/enviar', (req, res) => {
+  res.send("opa :D");
+});
+
 // Rota para receber o valor lido do QR Code
 router.post('/enviar', (req, res) => {
   const { barras, cpf } = req.body;

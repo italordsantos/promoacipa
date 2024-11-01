@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const apiRoutes = require('./apiroutes'); // Importa as rotas da API
+const apiRoutes = require('./api/apiroutes'); // Importa as rotas da API
 
 const app = express();
 
