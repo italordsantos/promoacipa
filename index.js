@@ -45,7 +45,7 @@ app.post('/api/enviar', (req, res) => {
 });
 
 // Endpoint para obter os cupons
-app.post('/listarCupons', (req, res) => {
+app.post('/api/listarCupons', (req, res) => {
   const cpf = req.body.cpf;  // O CPF virá do frontend
 
   

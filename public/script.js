@@ -18,7 +18,7 @@ document.getElementById('clienteCPF').addEventListener('input', function () {
 function consultarCupons() {
     const clienteCPF = document.getElementById('clienteCPF').value;
     if (clienteCPF && clienteCPF != '') {
-        fetch('/listarCupons', {
+        fetch('/api/listarCupons', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
