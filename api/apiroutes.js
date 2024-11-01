@@ -4,7 +4,7 @@ const qs = require('qs');
 
 const router = express.Router();
 
-router.get('/enviar', (req, res) => {
+router.get('/api/enviar', (req, res) => {
   res.send("opa :D");
 });
 
